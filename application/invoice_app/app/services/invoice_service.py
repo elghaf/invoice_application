@@ -18,42 +18,58 @@ class InvoiceService:
             pdf = canvas.Canvas(buffer, pagesize=A4)
             page_width, page_height = A4
 
-            # Colors
+            # Constants
             HEADER_BLUE = (0.29, 0.45, 0.68)
+            BLUE_LIGHT = (0.8, 0.8, 1)
             WHITE = (1, 1, 1)
             BLACK = (0, 0, 0)
+            MARGIN = 30
+            LINE_HEIGHT = 20
+            BOX_PADDING = 10
+
+            # Helper function to draw centered text
+            def draw_centered_text(pdf, text, x, y, width, font="Helvetica", size=10):
+                text_width = pdf.stringWidth(text, font, size)
+                pdf.drawString(x + (width - text_width) / 2, y, text)
+
+            # Helper function to draw a bordered box
+            def draw_box(pdf, x, y, width, height, fill_color=None, stroke_color=BLACK):
+                if fill_color:
+                    pdf.setFillColorRGB(*fill_color)
+                    pdf.rect(x, y, width, height, fill=1, stroke=0)
+                pdf.setFillColorRGB(*stroke_color)
+                pdf.rect(x, y, width, height, stroke=1)
 
             # Get the absolute path to the logo file
             current_dir = os.path.dirname(os.path.abspath(__file__))
             logo_path = os.path.join(current_dir, "..", "static", "logo.png")
 
             # Top section layout
-            top_margin = page_height - 120
-            
-            # Left side: Logo
+            top_margin = page_height - 100
+
+            # Left side: Logo - moved far left and up
             if os.path.exists(logo_path):
-                pdf.drawImage(logo_path, 50, top_margin, width=100, height=60)
-            
-            # Right side: DEVIS and Client Box
-            # DEVIS text
+                pdf.drawImage(logo_path, MARGIN, top_margin + 30, width=100, height=60)
+
+            # Right side: DEVIS and Client Box - moved far right and up
             pdf.setFont("Helvetica-Bold", 48)
             devis_text = "DEVIS"
             devis_width = pdf.stringWidth(devis_text, "Helvetica-Bold", 48)
-            devis_x = page_width - 200
-            devis_y = top_margin + 40
+            devis_x = page_width - devis_width - MARGIN - 10
+            devis_y = top_margin + 50
             pdf.drawString(devis_x, devis_y, devis_text)
 
-            # Client info box - moved down by adjusting the y position
+            # Client info box - moved right under DEVIS
             box_width = 200
             box_height = 80
-            box_x = page_width - box_width - 50
+            box_x = page_width - box_width - MARGIN + 10
             box_y = devis_y - 90
 
-            # Draw client info box with border
+            # Draw client box
             pdf.rect(box_x, box_y, box_width, box_height, stroke=1)
 
-            # Client Info with centered alignment
-            pdf.setFont("Helvetica-Bold", 10)
+            # Client Info
+            pdf.setFont("Helvetica", 10)
             client_info = [
                 data.client_name,
                 data.project,
@@ -64,181 +80,157 @@ class InvoiceService:
             # Center and draw each line of client info
             line_height = box_height / (len(client_info) + 1)
             for i, text in enumerate(client_info):
-                text_width = pdf.stringWidth(str(text), "Helvetica-Bold", 10)
+                text_width = pdf.stringWidth(str(text), "Helvetica", 10)
                 x = box_x + (box_width - text_width) / 2
                 y = box_y + box_height - ((i + 1) * line_height)
                 pdf.drawString(x, y, str(text))
 
-            # Info boxes (Date, N° Devis, PLANCHER)
-            info_y = top_margin - 40
+            # Info boxes (Date, N° Devis, PLANCHER) - adjusted starting position
+            info_y = top_margin 
+            box_label_width = 120
+            box_value_width = 80
+
             for label, value in [
                 ("Date du devis :", data.date.strftime("%d/%m/%Y")),
                 ("N° Devis :", data.invoice_number),
                 ("PLANCHER :", data.frame_number or "PH RDC")
             ]:
-                pdf.setFillColorRGB(*HEADER_BLUE)
-                pdf.rect(50, info_y, 120, 20, fill=1)
+                draw_box(pdf, MARGIN, info_y, box_label_width, LINE_HEIGHT, fill_color=HEADER_BLUE)
                 pdf.setFillColorRGB(*WHITE)
-                pdf.drawString(55, info_y + 6, label)
-                
-                pdf.setFillColorRGB(*WHITE)
-                pdf.rect(170, info_y, 80, 20, fill=1, stroke=1)
+                pdf.drawString(MARGIN + BOX_PADDING, info_y + 6, label)
+
+                draw_box(pdf, MARGIN + box_label_width, info_y, box_value_width, LINE_HEIGHT, fill_color=WHITE)
                 pdf.setFillColorRGB(*BLACK)
-                pdf.drawString(175, info_y + 6, str(value))
+                draw_centered_text(pdf, str(value), MARGIN + box_label_width, info_y + 6, box_value_width)
+
                 info_y -= 25
 
             # Table headers
-            table_y = info_y - 40
-            # add var 
-            
+            table_y = info_y - 30
             headers = [
-                ("Description", 250),
+                ("Description", 150),
                 ("Unité", 50),
                 ("NBRE", 50),
                 ("LNG/Qté", 60),
                 ("P.U", 60),
-                ("Total HT", 70) #add the number in format round(8.88888, 2)
+                ("Total HT", 170)
             ]
 
-            # Calculate total width
             total_width = sum(width for _, width in headers)
-            
-            # Draw header row
-            current_x = 50
-            pdf.setFillColorRGB(*HEADER_BLUE)
-
-            #total_width = "{:,.2f}".format(total_width).replace(",", " ").replace(".", ",")
-            #print(total_width)
-            pdf.rect(50, table_y, total_width, 20, fill=1)
+            table_x = (page_width - total_width) / 2  # Center table
+            draw_box(pdf, table_x, table_y, total_width, LINE_HEIGHT, fill_color=HEADER_BLUE)
             pdf.setFillColorRGB(*WHITE)
-            pdf.setFont("Helvetica-Bold", 10)
-            
+
+            current_x = table_x
             for title, width in headers:
-                pdf.rect(current_x, table_y, width, 20, stroke=1)
-                text_width = pdf.stringWidth(title, "Helvetica-Bold", 10)
-                x = current_x + (width - text_width) / 2
-                pdf.drawString(x, table_y + 6, title)
+                draw_box(pdf, current_x, table_y, width, LINE_HEIGHT)
+                draw_centered_text(pdf, title, current_x, table_y + 6, width)
                 current_x += width
 
+
             # Draw sections and items
-            current_y = table_y - 20
+            current_y = table_y - LINE_HEIGHT
 
             def draw_section_header(title):
                 nonlocal current_y
-                pdf.setFillColorRGB(*HEADER_BLUE)
-                pdf.rect(50, current_y, total_width, 20, fill=1)
-                pdf.setFillColorRGB(*WHITE)
-                pdf.drawString(55, current_y + 6, title)
-                current_y -= 20
+                draw_box(pdf, table_x, current_y, total_width, LINE_HEIGHT, fill_color=BLUE_LIGHT)
+                pdf.setFillColorRGB(*BLACK)
+                pdf.drawString(table_x + BOX_PADDING, current_y + 6, title)
+                current_y -= LINE_HEIGHT
+
+            def draw_section_header2(title):
+                nonlocal current_y
+                draw_box(pdf, table_x, current_y, total_width, LINE_HEIGHT, fill_color=WHITE)
+                
+                # Set the font to a bold variant
+                pdf.setFont("Helvetica-Bold", 12)  # Adjust the font name and size as needed
+                
+                # Set the fill color to black
+                pdf.setFillColorRGB(0, 0, 0)  # RGB values for black
+                
+                # Draw the string
+                pdf.drawString(table_x + BOX_PADDING, current_y + 6, title)
+                
+                current_y -= LINE_HEIGHT
 
             def draw_item_row(item, indent=False):
                 nonlocal current_y
                 pdf.setFillColorRGB(*BLACK)
-                current_x = 50
-                
-                # Draw row background and borders
-                pdf.setFillColorRGB(*WHITE)
-                pdf.rect(50, current_y, total_width, 20, fill=1, stroke=1)
-                
-                # Draw cell values
-                pdf.setFillColorRGB(*BLACK)
+                current_x = table_x
+
+                draw_box(pdf, current_x, current_y, total_width, LINE_HEIGHT, fill_color=WHITE)
+
                 cells = [
-                    ("    " + item.description if indent else item.description, 250),
+                    ("    " + item.description if indent else item.description, 150),
                     (item.unit, 50),
                     (str(item.quantity), 50),
                     (f"{item.length:.2f}", 60),
                     (f"{item.unit_price:.2f}", 60),
-                    (f"{item.total_price:.2f}", 70)
+                    (f"{item.total_price:.2f}", 170)
                 ]
-                
+
                 for value, width in cells:
-                    pdf.rect(current_x, current_y, width, 20, stroke=1)
+                    draw_box(pdf, current_x, current_y, width, LINE_HEIGHT)
                     if isinstance(value, str) and value.startswith("    "):
                         pdf.drawString(current_x + 20, current_y + 6, value.strip())
                     else:
-                        text_width = pdf.stringWidth(str(value), "Helvetica", 10)
-                        x = current_x + (width - text_width) / 2
-                        pdf.drawString(x, current_y + 6, str(value))
+                        draw_centered_text(pdf, str(value), current_x, current_y + 6, width)
                     current_x += width
-                
-                current_y -= 20
 
-            # Draw POUTRELLES section
-            draw_section_header("POUTRELLES")
-            poutrelles = [i for i in data.items if "PCP" in i.description]
-            for item in poutrelles:
-                draw_item_row(item)
+                current_y -= LINE_HEIGHT
 
-            # Draw HOURDIS section
-            draw_section_header("HOURDIS")
-            hourdis = [i for i in data.items if "HOURDIS" in i.description]
-            for item in hourdis:
-                draw_item_row(item, indent=True)
+            # Draw sections
+            sections = [
+                ("POUTRELLES", "PCP"),
+                ("HOURDIS", "HOURDIS"),
+                ("PANNEAU TREILLIS SOUDES", "PTS")
+            ]
 
-            # Draw PANNEAU TREILLIS SOUDES section
-            draw_section_header("PANNEAU TREILLIS SOUDES")
-            treillis = [i for i in data.items if "PTS" in i.description]
-            for item in treillis:
-                draw_item_row(item, indent=True)
+            for section_title, keyword in sections:
+                draw_section_header(section_title)
+                items = [i for i in data.items if keyword in i.description]
+                for item in items:
+                    draw_item_row(item, indent=(keyword != "lfflflflf"))
 
-            # Calculate current_y after all sections
-            current_y = table_y - (len(poutrelles) + len(hourdis) + len(treillis) + 3) * 20 - 60
-
-            # Totals section
-            totals_y = current_y - 40
-            
-            # NB box on the left
+            # NB box with just "NB:" text
             nb_box_width = 200
             nb_box_height = 80
             pdf.setFillColorRGB(*BLACK)
-            pdf.rect(50, totals_y - nb_box_height, nb_box_width, nb_box_height, stroke=1)
-            pdf.setFont("Helvetica-Bold", 10)
-            pdf.drawString(60, totals_y - nb_box_height + 60, "NB:")
+            pdf.rect(20, current_y - nb_box_height, nb_box_width, nb_box_height, stroke=1)
+            pdf.setFont("Helvetica-Bold", 12)  # Made slightly larger for better visibility
+            pdf.drawString(60, current_y - nb_box_height + 60, "NB:")
 
-            # Totals table on the right with proper alignment
-            totals_table_width = 250
+            # Totals section
+            current_y -= 20
+            totals_table_width = 300
             row_height = 20
-            x_position = page_width - totals_table_width - 50  # Move table to the right
-            
-            # Draw total rows with proper borders and alignment
+
             for i, (label1, label2, value) in enumerate([
                 ("Total", "H.T", f"{data.total_ht:.2f} DH"),
                 ("TVA", "20 %", f"{data.tax:.2f} DH"),
                 ("Total", "TTC", f"{data.total_ttc:.2f} DH")
             ]):
-                y = totals_y - (i * row_height)
-                
-                # Draw row background and borders
-                pdf.setFillColorRGB(*WHITE)
-                pdf.rect(x_position, y, totals_table_width/2, row_height, stroke=1)  # Left cell
-                pdf.rect(x_position + totals_table_width/2, y, totals_table_width/2, row_height, stroke=1)  # Right cell
-                
-                # Draw labels and value
-                pdf.setFillColorRGB(*BLACK)
-                pdf.setFont("Helvetica", 10)
-                pdf.drawString(x_position + 5, y + 6, f"{label1}    {label2}")
-                pdf.drawRightString(x_position + totals_table_width - 5, y + 6, value)
-
-            # Validity text below the totals
-            pdf.setFont("Helvetica", 10)
-            pdf.drawString(50, totals_y - nb_box_height - 20, "Validité du devis: 1 MOIS")
+                y = current_y - (i * row_height)
+                totals_x = (page_width - totals_table_width) - 27  # Center totals table
+                draw_box(pdf, totals_x, y, totals_table_width / 2, row_height)
+                draw_box(pdf, totals_x + totals_table_width / 2, y, totals_table_width / 2, row_height)
+                pdf.drawString(totals_x + 10, y + 6, f"{label1}    {label2}")
+                pdf.drawRightString(totals_x + totals_table_width - 10, y + 6, value)
 
             # Footer
-            pdf.setFillColorRGB(*BLACK)
             pdf.setFont("Helvetica", 8)
-            
             if os.path.exists(logo_path):
-                pdf.drawImage(logo_path, 50, 20, width=30, height=15)
-            
+                pdf.drawImage(logo_path, MARGIN, 20, width=30, height=15)
+
             footer_text = "Douar Ait Laarassi Tidili, Cercle El Kelâa, Route de Safi, Km 14-40000 Marrakech"
-            pdf.drawCentredString(page_width/2, 30, footer_text)
+            pdf.drawCentredString(page_width / 2, 30, footer_text)
             footer_contact = "Tél: 05 24 01 55 54 Fax : 05 24 01 55 29 E-mail : compra45@gmail.com"
-            pdf.drawCentredString(page_width/2, 20, footer_contact)
+            pdf.drawCentredString(page_width / 2, 20, footer_contact)
 
             pdf.save()
             buffer.seek(0)
             return buffer.getvalue()
-            
+
         except Exception as e:
             logger.error(f"Error in PDF generation: {str(e)}", exc_info=True)
             raise
