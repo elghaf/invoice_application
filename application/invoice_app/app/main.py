@@ -1,7 +1,7 @@
 from fastapi import FastAPI, Request
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
-from app.routes.invoices import router as invoice_router
+from .routes import invoices
 from app.db.database import init_db
 import os
 
@@ -17,7 +17,7 @@ app.mount("/static", StaticFiles(directory=os.path.join(BASE_DIR, "app/static"))
 templates = Jinja2Templates(directory=os.path.join(BASE_DIR, "app/templates"))
 
 # Include routers
-app.include_router(invoice_router, prefix="/api/invoices", tags=["invoices"])
+app.include_router(invoices.router)
 
 @app.on_event("startup")
 async def startup_event():

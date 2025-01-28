@@ -49,6 +49,22 @@
                                 <label for="clientAddress" class="form-label">Adresse</label>
                                 <input type="text" class="form-control" id="clientAddress" required>
                             </div>
+                            <div class="mb-3">
+                                <label class="form-label">Type Client</label>
+                                <div class="btn-group" role="group">
+                                    <input type="radio" class="btn-check" name="clientType" id="EE" value="EE" autocomplete="off">
+                                    <label class="btn btn-outline-primary" for="EE">EE</label>
+
+                                    <input type="radio" class="btn-check" name="clientType" id="MED" value="MED" autocomplete="off">
+                                    <label class="btn btn-outline-primary" for="MED">MED</label>
+
+                                    <input type="radio" class="btn-check" name="clientType" id="AM" value="AM" autocomplete="off">
+                                    <label class="btn btn-outline-primary" for="AM">AM</label>
+
+                                    <input type="radio" class="btn-check" name="clientType" id="DIV" value="DIV" autocomplete="off">
+                                    <label class="btn btn-outline-primary" for="DIV">DIV</label>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -509,12 +525,57 @@
                     console.error("Error:", error);
                     alert(`Error: ${error.message}`);
                 }
+
+                // After successful submission, update the invoice number for the current type
+                const selectedType = document.querySelector('input[name="clientType"]:checked')?.value;
+                if (selectedType) {
+                    await updateInvoiceNumber(selectedType);
+                }
             });
 
             // Set today's date automatically
             const today = new Date();
             const formattedDate = today.toISOString().split('T')[0];
             document.querySelector("#date").value = formattedDate;
+
+            // Auto-generate invoice number when client type is selected
+            const clientTypeInputs = document.querySelectorAll('input[name="clientType"]');
+            const invoiceNumberInput = document.querySelector("#invoiceNumber");
+
+            // Function to get and update the invoice number
+            async function updateInvoiceNumber(selectedType) {
+                try {
+                    // Disable the input while fetching
+                    invoiceNumberInput.disabled = true;
+                    
+                    const response = await fetch(`/api/invoices/last-number/${selectedType}`);
+                    if (response.ok) {
+                        const data = await response.json();
+                        invoiceNumberInput.value = data.formatted_number;
+                    } else {
+                        throw new Error('Failed to get invoice number');
+                    }
+                } catch (error) {
+                    console.error('Error:', error);
+                    invoiceNumberInput.value = `DCP/${selectedType}/0001`;
+                } finally {
+                    // Re-enable the input
+                    invoiceNumberInput.disabled = false;
+                }
+            }
+
+            // Update invoice number when client type is selected
+            clientTypeInputs.forEach(input => {
+                input.addEventListener('change', () => {
+                    updateInvoiceNumber(input.value);
+                });
+            });
+
+            // Optional: Update the number when the page loads if a type is already selected
+            const selectedType = document.querySelector('input[name="clientType"]:checked')?.value;
+            if (selectedType) {
+                updateInvoiceNumber(selectedType);
+            }
         });
     </script>
 </body>

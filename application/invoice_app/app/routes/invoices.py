@@ -1,8 +1,8 @@
 from fastapi import APIRouter, Depends, HTTPException, Request
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select
-from typing import List
-from sqlalchemy.orm import selectinload, joinedload
+from sqlalchemy import select, func, Sequence
+from typing import List, Optional
+from sqlalchemy.orm import selectinload, joinedload, Session
 from fastapi.responses import StreamingResponse
 import logging
 from datetime import datetime
@@ -15,7 +15,7 @@ from app.services.invoice_service import InvoiceService
 # Set up logging
 logger = logging.getLogger(__name__)
 
-router = APIRouter()
+router = APIRouter(prefix="/api/invoices", tags=["invoices"])
 
 @router.post("/", response_model=InvoiceResponse)
 async def create_new_invoice(
@@ -23,10 +23,23 @@ async def create_new_invoice(
     db: AsyncSession = Depends(get_db)
 ):
     try:
-        # Create invoice with current date
+        # Get current max ID
+        query = select(func.max(Invoice.id))
+        result = await db.execute(query)
+        current_max_id = result.scalar() or 0
+        next_id = current_max_id + 1
+        
+        # Extract client type from the invoice number
+        client_type = invoice.invoice_number.split('/')[1]
+        
+        # Create new invoice number
+        new_invoice_number = f"DCP/{client_type}/{next_id:04d}"
+        
+        # Create invoice with the new number
         db_invoice = Invoice(
-            invoice_number=invoice.invoice_number,
-            date=datetime.now(),  # Set current date automatically
+            id=next_id,
+            invoice_number=new_invoice_number,
+            date=invoice.date,
             project=invoice.project,
             client_name=invoice.client_name,
             client_phone=invoice.client_phone,
@@ -34,13 +47,13 @@ async def create_new_invoice(
             total_ht=invoice.total_ht,
             tax=invoice.tax,
             total_ttc=invoice.total_ttc,
-            frame_number=invoice.frame_number,
-            customer_name=invoice.customer_name,
-            amount=invoice.amount
+            frame_number=invoice.frame_number
         )
+        
         db.add(db_invoice)
-        await db.flush()
-
+        await db.commit()
+        await db.refresh(db_invoice)
+        
         # Create invoice items
         for item_data in invoice.items:
             db_item = InvoiceItem(
@@ -125,4 +138,40 @@ async def generate_invoice_pdf(
         )
     except Exception as e:
         logger.error(f"Error generating PDF: {str(e)}", exc_info=True)
+        raise HTTPException(status_code=500, detail=str(e))
+
+@router.get("/last-number/{client_type}", response_model=dict)
+async def get_last_invoice_number(
+    client_type: str,
+    db: AsyncSession = Depends(get_db)
+):
+    try:
+        # Use async query syntax
+        query = select(func.max(Invoice.id))
+        result = await db.execute(query)
+        current_max_id = result.scalar() or 0
+        
+        # Next ID will be current max + 1
+        next_id = current_max_id + 1
+        
+        # Format the invoice number with the next ID
+        formatted_number = f"DCP/{client_type}/{next_id:04d}"
+        
+        return {
+            "next_number": next_id,
+            "formatted_number": formatted_number
+        }
+    except Exception as e:
+        print(f"Error in get_last_invoice_number: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@router.post("/reset-sequence")
+def reset_invoice_sequence(db: Session = Depends(get_db)):
+    try:
+        # Reset the sequence to 1
+        db.execute("ALTER SEQUENCE invoice_id_seq RESTART WITH 1")
+        db.commit()
+        return {"message": "Sequence reset successfully"}
+    except Exception as e:
+        db.rollback()
         raise HTTPException(status_code=500, detail=str(e)) 
