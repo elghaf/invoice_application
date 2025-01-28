@@ -45,6 +45,10 @@
                                 <label for="clientPhone" class="form-label">Téléphone</label>
                                 <input type="tel" class="form-control" id="clientPhone" required>
                             </div>
+                            <div class="mb-3">
+                                <label for="clientAddress" class="form-label">Adresse</label>
+                                <input type="text" class="form-control" id="clientAddress" required>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -61,7 +65,7 @@
                             </div>
                             <div class="mb-3">
                                 <label for="date" class="form-label">Date</label>
-                                <input type="date" class="form-control" id="date" required>
+                                <input type="date" class="form-control" id="date" readonly>
                             </div>
                             <div class="mb-3">
                                 <label for="project" class="form-label">Type d'ouvrage</label>
@@ -282,7 +286,7 @@
                     { description: "HOURDIS TYPE 12", unit: "U", quantity: 1, length: 300, unit_price: 3.50 }
                 ],
                 panneaux: [
-                    { description: "TRS SISMIQUE 5*3,5", unit: "U", quantity: 1, length: 9, unit_price: 195.00 }
+                    { description: "PTS SISMIQUE 5*3,5", unit: "U", quantity: 1, length: 9, unit_price: 195.00 }
                 ]
             };
 
@@ -364,8 +368,8 @@
                     { description: "HOURDIS TYPE 30", unit: "U", quantity: 1, length: 0, unit_price: 0 }
                 ],
                 panneaux: [
-                    { description: "TRS Normal 3,5*3,5", unit: "U", quantity: 1, length: 0, unit_price: 0 },
-                    { description: "TRS SISMIQUE 5*3,5", unit: "U", quantity: 1, length: 9, unit_price: 195.00 }
+                    { description: "PTS Normal 3,5*3,5", unit: "U", quantity: 1, length: 0, unit_price: 0 },
+                    { description: "PTS SISMIQUE 5*3,5", unit: "U", quantity: 1, length: 9, unit_price: 195.00 }
                 ]
             };
 
@@ -446,6 +450,7 @@
                     project: document.querySelector("#project").value,
                     client_name: document.querySelector("#clientName").value,
                     client_phone: document.querySelector("#clientPhone").value,
+                    address: document.querySelector("#clientAddress").value,
                     total_ht: parseFloat(document.querySelector("#totalHT").value || 0),
                     tax: parseFloat(document.querySelector("#tax").value || 0),
                     total_ttc: parseFloat(document.querySelector("#totalTTC").value || 0),
@@ -505,6 +510,11 @@
                     alert(`Error: ${error.message}`);
                 }
             });
+
+            // Set today's date automatically
+            const today = new Date();
+            const formattedDate = today.toISOString().split('T')[0];
+            document.querySelector("#date").value = formattedDate;
         });
     </script>
 </body>

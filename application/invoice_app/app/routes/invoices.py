@@ -5,6 +5,7 @@ from typing import List
 from sqlalchemy.orm import selectinload, joinedload
 from fastapi.responses import StreamingResponse
 import logging
+from datetime import datetime
 
 from app.db.database import get_db
 from app.schemas.invoice import InvoiceCreate, InvoiceResponse
@@ -22,13 +23,14 @@ async def create_new_invoice(
     db: AsyncSession = Depends(get_db)
 ):
     try:
-        # Create invoice
+        # Create invoice with current date
         db_invoice = Invoice(
             invoice_number=invoice.invoice_number,
-            date=invoice.date,
+            date=datetime.now(),  # Set current date automatically
             project=invoice.project,
             client_name=invoice.client_name,
             client_phone=invoice.client_phone,
+            address=invoice.address,
             total_ht=invoice.total_ht,
             tax=invoice.tax,
             total_ttc=invoice.total_ttc,

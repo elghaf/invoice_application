@@ -2,6 +2,7 @@ from sqlalchemy.orm import DeclarativeBase, relationship
 from sqlalchemy import Column, Integer, String, Float, DateTime, ForeignKey
 from sqlalchemy.ext.declarative import declarative_base
 from datetime import datetime
+from sqlalchemy.sql import func
 
 Base = declarative_base()
 
@@ -10,10 +11,11 @@ class Invoice(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     invoice_number = Column(String)
-    date = Column(DateTime)
+    date = Column(DateTime, default=func.now())
     project = Column(String)
     client_name = Column(String)
     client_phone = Column(String)
+    address = Column(String)
     total_ht = Column(Float)
     tax = Column(Float)
     total_ttc = Column(Float)

@@ -15,10 +15,11 @@ class InvoiceItemCreate(BaseModel):
 
 class InvoiceCreate(BaseModel):
     invoice_number: str
-    date: datetime
+    date: Optional[datetime] = None
     project: str
     client_name: str
     client_phone: str
+    address: str
     total_ht: float
     tax: float
     total_ttc: float
