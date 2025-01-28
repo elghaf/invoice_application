@@ -1,0 +1,574 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Invoice Generator</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <style>
+        body {
+            padding: 20px;
+        }
+        .form-section {
+            margin-bottom: 20px;
+        }
+        .highlight {
+            background-color: #f1f1f1;
+            border: 1px solid #ccc;
+        }
+        .header-section {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+        .logo-section {
+            width: 200px;
+        }
+        .logo-section img {
+            width: 100%;
+            height: auto;
+        }
+        .title-section {
+            text-align: center;
+            flex-grow: 1;
+        }
+        .client-info {
+            width: 200px;
+        }
+        .form-control {
+            margin-bottom: 10px;
+        }
+        .table th {
+            background-color: #2c5282;
+            color: white;
+        }
+        .btn-success {
+            background-color: #2c5282;
+            border-color: #2c5282;
+        }
+        .btn-success:hover {
+            background-color: #1a365d;
+            border-color: #1a365d;
+        }
+        .table-primary {
+            background-color: #2c5282 !important;
+            color: white !important;
+        }
+        
+        .table-primary td {
+            font-weight: bold;
+        }
+        
+        .form-control {
+            padding: 4px 8px;
+            font-size: 14px;
+        }
+        
+        .table td {
+            padding: 4px;
+        }
+
+        /* Table section styling */
+        .table-section {
+            border: 2px solid #2c5282;
+            margin-bottom: 20px;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .table-section table {
+            margin-bottom: 0;
+        }
+
+        .table-section .table-primary td {
+            border-bottom: 1px solid #1a365d;
+        }
+
+        .section-title {
+            background-color: #2c5282;
+            color: white;
+            padding: 10px;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header-section">
+            <div class="logo-section">
+                <img src="/static/logo.png" alt="Carriprefa Logo">
+            </div>
+            <div class="title-section">
+                <h1>DEVIS</h1>
+            </div>
+            <div class="client-info">
+                <!-- Empty div for symmetry -->
+            </div>
+        </div>
+
+        <form id="invoiceForm">
+            <!-- Invoice Information -->
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="form-section">
+                        <div class="mb-3">
+                            <label for="clientName" class="form-label">Nom</label>
+                            <select class="form-control" id="clientName" required>
+                                <option value="STE ZELGHAT">STE ZELGHAT</option>
+                                <option value="ABC Builders">ABC Builders</option>
+                                <option value="XYZ Enterprises">XYZ Enterprises</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="clientPhone" class="form-label">Telephone</label>
+                            <input type="tel" class="form-control" id="clientPhone" value="06 61 92 96 28" required>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-section">
+                        <div class="mb-3">
+                            <label for="project" class="form-label">Type d'ouvrage</label>
+                            <select class="form-control" id="project" required>
+                                <option value="VILLA EN R+1">VILLA EN R+1</option>
+                                <option value="Office Renovation">Office Renovation</option>
+                                <option value="Warehouse Setup">Warehouse Setup</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="date" class="form-label">Date du devis</label>
+                            <input type="date" class="form-control" id="date" value="2025-01-27" required>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-12">
+                    <div class="mb-3">
+                        <label for="invoiceNumber" class="form-label">N° Devis</label>
+                        <input type="text" class="form-control" id="invoiceNumber" value="DCP/MED/1275" required>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Invoice Items -->
+            <div class="form-section">
+                <!-- POUTRELLES Section -->
+                <div class="table-section">
+                    <div class="section-title">POUTRELLES</div>
+                    <table class="table" id="poutrellesTable">
+                        <thead class="highlight">
+                            <tr>
+                                <th>Description</th>
+                                <th>Unité</th>
+                                <th>NBRE</th>
+                                <th>LNG/Qté</th>
+                                <th>P.U</th>
+                                <th>Total HT</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- POUTRELLES items will be added here -->
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- HOURDIS Section -->
+                <div class="table-section">
+                    <div class="section-title">HOURDIS</div>
+                    <table class="table" id="hourdisTable">
+                        <thead class="highlight">
+                            <tr>
+                                <th>Description</th>
+                                <th>Unité</th>
+                                <th>NBRE</th>
+                                <th>LNG/Qté</th>
+                                <th>P.U</th>
+                                <th>Total HT</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- HOURDIS items will be added here -->
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- PANNEAU TREILLIS SOUDES Section -->
+                <div class="table-section">
+                    <div class="section-title">PANNEAU TREILLIS SOUDES</div>
+                    <table class="table" id="panneauTable">
+                        <thead class="highlight">
+                            <tr>
+                                <th>Description</th>
+                                <th>Unité</th>
+                                <th>NBRE</th>
+                                <th>LNG/Qté</th>
+                                <th>P.U</th>
+                                <th>Total HT</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- PANNEAU items will be added here -->
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="text-end mb-3">
+                    <button type="button" class="btn btn-primary" id="addPoutrelles">+ Poutrelles</button>
+                    <button type="button" class="btn btn-primary" id="addHourdis">+ Hourdis</button>
+                    <button type="button" class="btn btn-primary" id="addPanneau">+ Panneau</button>
+                </div>
+            </div>
+
+            <!-- Totals -->
+            <div class="row">
+                <div class="col-md-6 offset-md-6">
+                    <div class="form-section">
+                        <div class="mb-3">
+                            <label for="totalHT" class="form-label">Total H.T</label>
+                            <input type="number" class="form-control" id="totalHT" step="0.01" value="22667.00" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="tax" class="form-label">TVA 20%</label>
+                            <input type="number" class="form-control" id="tax" step="0.01" value="4533.00" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="totalTTC" class="form-label">Total TTC</label>
+                            <input type="number" class="form-control" id="totalTTC" step="0.01" value="27200.00" required>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="text-center">
+                <button type="submit" class="btn btn-success">Générer le devis</button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Add these modals after your form but before the closing body tag -->
+    <div class="modal fade" id="poutrellesModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Sélectionner Poutrelles</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Description</th>
+                                    <th>Unité</th>
+                                    <th>NBRE</th>
+                                    <th>LNG/Qté</th>
+                                    <th>P.U</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <!-- Rows will be populated by JavaScript -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Hourdis Modal -->
+    <div class="modal fade" id="hourdisModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Sélectionner Hourdis</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Description</th>
+                                    <th>Unité</th>
+                                    <th>NBRE</th>
+                                    <th>LNG/Qté</th>
+                                    <th>P.U</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <!-- Rows will be populated by JavaScript -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Panneau Modal -->
+    <div class="modal fade" id="panneauModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Sélectionner Panneau</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Description</th>
+                                    <th>Unité</th>
+                                    <th>NBRE</th>
+                                    <th>LNG/Qté</th>
+                                    <th>P.U</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <!-- Rows will be populated by JavaScript -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            const poutrellesTable = document.querySelector("#poutrellesTable tbody");
+            const hourdisTable = document.querySelector("#hourdisTable tbody");
+            const panneauTable = document.querySelector("#panneauTable tbody");
+            const invoiceForm = document.querySelector("#invoiceForm");
+
+            // Define default items for each section
+            const defaultItems = {
+                poutrelles: [
+                    { description: "PCP 114N", unit: "ML", quantity: 21, length: 3.00, unit_price: 26.00 },
+                    { description: "PCP 113N", unit: "ML", quantity: 12, length: 4.00, unit_price: 26.00 },
+                    { description: "PCP 113B SISMIQUE", unit: "ML", quantity: 22, length: 4.20, unit_price: 26.00 },
+                    { description: "PCP 114B SISMIQUE", unit: "ML", quantity: 12, length: 4.90, unit_price: 30.00 },
+                    { description: "PCP 135 SISMIQUE", unit: "ML", quantity: 8, length: 5.00, unit_price: 38.00 },
+                    { description: "PCP 156 SISMIQUE", unit: "ML", quantity: 12, length: 5.10, unit_price: 38.00 },
+                    { description: "PCP 158 SISMIQUE", unit: "ML", quantity: 12, length: 5.50, unit_price: 51.00 }
+                ],
+                hourdis: [
+                    { description: "HOURDIS TYPE 08", unit: "U", quantity: 1, length: 200, unit_price: 3.40 },
+                    { description: "HOURDIS TYPE 12", unit: "U", quantity: 1, length: 300, unit_price: 3.50 },
+                    { description: "HOURDIS TYPE 16", unit: "U", quantity: 1, length: 0, unit_price: 0 },
+                    { description: "HOURDIS TYPE 20", unit: "U", quantity: 1, length: 0, unit_price: 0 },
+                    { description: "HOURDIS TYPE 25", unit: "U", quantity: 1, length: 450, unit_price: 4.80 },
+                    { description: "HOURDIS TYPE 30", unit: "U", quantity: 1, length: 0, unit_price: 0 }
+                ],
+                panneaux: [
+                    { description: "TRS Normal 3,5*3,5", unit: "U", quantity: 1, length: 0, unit_price: 0 },
+                    { description: "TRS SISMIQUE 5*3,5", unit: "U", quantity: 1, length: 9, unit_price: 195.00 }
+                ]
+            };
+
+            // Function to add an item row
+            function addItemRow(item, tableBody) {
+                const row = document.createElement("tr");
+                const total = (item.quantity * item.length * item.unit_price).toFixed(2);
+                
+                row.innerHTML = `
+                    <td><input type="text" class="form-control" name="description" value="${item.description}" required></td>
+                    <td><input type="text" class="form-control" name="unit" value="${item.unit}" required></td>
+                    <td><input type="number" class="form-control" name="quantity" value="${item.quantity}" required></td>
+                    <td><input type="number" class="form-control" name="length" value="${item.length}" step="0.01" required></td>
+                    <td><input type="number" class="form-control" name="unitPrice" value="${item.unit_price}" step="0.01" required></td>
+                    <td><input type="number" class="form-control" name="totalHT" value="${total}" readonly></td>
+                    <td><button type="button" class="btn btn-danger btn-sm remove-item">×</button></td>
+                `;
+
+                row.querySelector(".remove-item").addEventListener("click", () => {
+                    row.remove();
+                    updateTotals();
+                });
+
+                // Add input event listeners to update total
+                ['quantity', 'length', 'unitPrice'].forEach(field => {
+                    row.querySelector(`input[name='${field}']`).addEventListener('input', () => {
+                        const qty = parseFloat(row.querySelector('input[name="quantity"]').value) || 0;
+                        const length = parseFloat(row.querySelector('input[name="length"]').value) || 0;
+                        const price = parseFloat(row.querySelector('input[name="unitPrice"]').value) || 0;
+                        const rowTotal = (qty * length * price).toFixed(2);
+                        row.querySelector('input[name="totalHT"]').value = rowTotal;
+                        updateTotals();
+                    });
+                });
+
+                tableBody.appendChild(row);
+                updateTotals();
+            }
+
+            // Function to update totals
+            function updateTotals() {
+                const totalHT = Array.from(document.querySelectorAll('input[name="totalHT"]'))
+                    .reduce((sum, input) => sum + (parseFloat(input.value) || 0), 0);
+                
+                const formattedTotalHT = totalHT.toFixed(2);
+                const tax = (totalHT * 0.20).toFixed(2);
+                const totalTTC = (totalHT * 1.20).toFixed(2);
+                
+                document.querySelector("#totalHT").value = formattedTotalHT;
+                document.querySelector("#tax").value = tax;
+                document.querySelector("#totalTTC").value = totalTTC;
+            }
+
+            // Initialize tables with default items
+            defaultItems.poutrelles.forEach(item => addItemRow(item, poutrellesTable));
+            defaultItems.hourdis.forEach(item => addItemRow(item, hourdisTable));
+            defaultItems.panneaux.forEach(item => addItemRow(item, panneauTable));
+
+            // Update initial totals
+            updateTotals();
+
+            // Predefined items data
+            const predefinedItems = {
+                poutrelles: [
+                    { description: "PCP 114N", unit: "ML", quantity: 21, length: 3.00, unit_price: 26.00 },
+                    { description: "PCP 113N", unit: "ML", quantity: 12, length: 4.00, unit_price: 26.00 },
+                    { description: "PCP 113B SISMIQUE", unit: "ML", quantity: 22, length: 4.20, unit_price: 26.00 },
+                    { description: "PCP 114B SISMIQUE", unit: "ML", quantity: 12, length: 4.90, unit_price: 30.00 },
+                    { description: "PCP 135 SISMIQUE", unit: "ML", quantity: 8, length: 5.00, unit_price: 38.00 },
+                    { description: "PCP 156 SISMIQUE", unit: "ML", quantity: 12, length: 5.10, unit_price: 38.00 },
+                    { description: "PCP 158 SISMIQUE", unit: "ML", quantity: 12, length: 5.50, unit_price: 51.00 }
+                ],
+                hourdis: [
+                    { description: "HOURDIS TYPE 08", unit: "U", quantity: 1, length: 200, unit_price: 3.40 },
+                    { description: "HOURDIS TYPE 12", unit: "U", quantity: 1, length: 300, unit_price: 3.50 },
+                    { description: "HOURDIS TYPE 16", unit: "U", quantity: 1, length: 0, unit_price: 0 },
+                    { description: "HOURDIS TYPE 20", unit: "U", quantity: 1, length: 0, unit_price: 0 },
+                    { description: "HOURDIS TYPE 25", unit: "U", quantity: 1, length: 450, unit_price: 4.80 },
+                    { description: "HOURDIS TYPE 30", unit: "U", quantity: 1, length: 0, unit_price: 0 }
+                ],
+                panneaux: [
+                    { description: "TRS Normal 3,5*3,5", unit: "U", quantity: 1, length: 0, unit_price: 0 },
+                    { description: "TRS SISMIQUE 5*3,5", unit: "U", quantity: 1, length: 9, unit_price: 195.00 }
+                ]
+            };
+
+            // Function to populate modal with items
+            function populateModal(modalId, items, targetTable) {
+                const modal = document.querySelector(modalId);
+                const tbody = modal.querySelector('tbody');
+                tbody.innerHTML = '';
+
+                items.forEach(item => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${item.description}</td>
+                        <td>${item.unit}</td>
+                        <td><input type="number" class="form-control form-control-sm" value="${item.quantity}" name="modal-quantity"></td>
+                        <td><input type="number" class="form-control form-control-sm" value="${item.length}" step="0.01" name="modal-length"></td>
+                        <td><input type="number" class="form-control form-control-sm" value="${item.unit_price}" step="0.01" name="modal-price"></td>
+                        <td>
+                            <button class="btn btn-primary btn-sm add-item">
+                                Ajouter
+                            </button>
+                        </td>
+                    `;
+
+                    row.querySelector('.add-item').addEventListener('click', () => {
+                        const newItem = {
+                            ...item,
+                            quantity: parseFloat(row.querySelector('[name="modal-quantity"]').value) || 0,
+                            length: parseFloat(row.querySelector('[name="modal-length"]').value) || 0,
+                            unit_price: parseFloat(row.querySelector('[name="modal-price"]').value) || 0
+                        };
+                        addItemRow(newItem, targetTable);
+                        bootstrap.Modal.getInstance(modal).hide();
+                    });
+
+                    tbody.appendChild(row);
+                });
+            }
+
+            // Update button click handlers
+            document.querySelector("#addPoutrelles").addEventListener("click", () => {
+                populateModal('#poutrellesModal', predefinedItems.poutrelles, poutrellesTable);
+                new bootstrap.Modal('#poutrellesModal').show();
+            });
+
+            document.querySelector("#addHourdis").addEventListener("click", () => {
+                populateModal('#hourdisModal', predefinedItems.hourdis, hourdisTable);
+                new bootstrap.Modal('#hourdisModal').show();
+            });
+
+            document.querySelector("#addPanneau").addEventListener("click", () => {
+                populateModal('#panneauModal', predefinedItems.panneaux, panneauTable);
+                new bootstrap.Modal('#panneauModal').show();
+            });
+
+            // Update the form submission to collect items from all tables
+            invoiceForm.addEventListener("submit", async (event) => {
+                event.preventDefault();
+
+                const getAllItems = () => {
+                    const items = [];
+                    [poutrellesTable, hourdisTable, panneauTable].forEach(table => {
+                        items.push(...Array.from(table.querySelectorAll("tr")).map(row => ({
+                            description: row.querySelector("input[name='description']").value,
+                            unit: row.querySelector("input[name='unit']").value,
+                            quantity: parseInt(row.querySelector("input[name='quantity']").value, 10),
+                            unit_price: parseFloat(row.querySelector("input[name='unitPrice']").value)
+                        })));
+                    });
+                    return items;
+                };
+
+                const data = {
+                    client_name: document.querySelector("#clientName").value,
+                    client_phone: document.querySelector("#clientPhone").value,
+                    invoice_number: document.querySelector("#invoiceNumber").value,
+                    date: document.querySelector("#date").value,
+                    project: document.querySelector("#project").value,
+                    items: getAllItems(),
+                    total_ht: parseFloat(document.querySelector("#totalHT").value),
+                    tax: parseFloat(document.querySelector("#tax").value),
+                    total_ttc: parseFloat(document.querySelector("#totalTTC").value)
+                };
+
+                try {
+                    const response = await fetch("/generate-invoice", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify(data)
+                    });
+
+                    if (response.ok) {
+                        const blob = await response.blob();
+                        const url = window.URL.createObjectURL(blob);
+                        const a = document.createElement("a");
+                        a.href = url;
+                        a.download = "devis.pdf";
+                        a.click();
+                        window.URL.revokeObjectURL(url);
+                    } else {
+                        const errorData = await response.json();
+                        alert(`Failed to generate invoice: ${errorData.detail || 'Unknown error'}`);
+                    }
+                } catch (error) {
+                    alert("Failed to generate invoice. Please try again.");
+                    console.error(error);
+                }
+            });
+        });
+    </script>
+
+    <!-- Add Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

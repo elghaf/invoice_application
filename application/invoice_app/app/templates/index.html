@@ -1,0 +1,508 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Invoice Generator</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .table-fixed {
+            table-layout: fixed;
+        }
+        .table-fixed td {
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        .section-title {
+            background-color: #f8f9fa;
+            padding: 10px;
+            margin-top: 20px;
+            margin-bottom: 10px;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container mt-4">
+        <h2 class="mb-4">Générateur de Devis</h2>
+        
+        <form id="invoiceForm">
+            <!-- Client Information -->
+            <div class="row mb-4">
+                <div class="col-md-6">
+                    <div class="card">
+                        <div class="card-header">
+                            Information Client
+                        </div>
+                        <div class="card-body">
+                            <div class="mb-3">
+                                <label for="clientName" class="form-label">Nom du Client</label>
+                                <input type="text" class="form-control" id="clientName" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="clientPhone" class="form-label">Téléphone</label>
+                                <input type="tel" class="form-control" id="clientPhone" required>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-md-6">
+                    <div class="card">
+                        <div class="card-header">
+                            Information Devis
+                        </div>
+                        <div class="card-body">
+                            <div class="mb-3">
+                                <label for="invoiceNumber" class="form-label">N° Devis</label>
+                                <input type="text" class="form-control" id="invoiceNumber" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="date" class="form-label">Date</label>
+                                <input type="date" class="form-control" id="date" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="project" class="form-label">Type d'ouvrage</label>
+                                <input type="text" class="form-control" id="project" required>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Poutrelles Section -->
+            <div class="section-title d-flex justify-content-between align-items-center">
+                <h4>POUTRELLES</h4>
+                <button type="button" class="btn btn-primary" id="addPoutrelles">
+                    Ajouter Poutrelle
+                </button>
+            </div>
+            <div class="table-responsive">
+                <table class="table table-bordered table-fixed">
+                    <thead class="table-primary">
+                        <tr>
+                            <th style="width: 30%">Description</th>
+                            <th style="width: 10%">Unité</th>
+                            <th style="width: 10%">Quantité</th>
+                            <th style="width: 15%">Longueur</th>
+                            <th style="width: 15%">P.U</th>
+                            <th style="width: 15%">Total HT</th>
+                            <th style="width: 5%"></th>
+                        </tr>
+                    </thead>
+                    <tbody id="poutrellesTable"></tbody>
+                </table>
+            </div>
+
+            <!-- Hourdis Section -->
+            <div class="section-title d-flex justify-content-between align-items-center">
+                <h4>HOURDIS</h4>
+                <button type="button" class="btn btn-primary" id="addHourdis">
+                    Ajouter Hourdis
+                </button>
+            </div>
+            <div class="table-responsive">
+                <table class="table table-bordered table-fixed">
+                    <thead class="table-primary">
+                        <tr>
+                            <th style="width: 30%">Description</th>
+                            <th style="width: 10%">Unité</th>
+                            <th style="width: 10%">Quantité</th>
+                            <th style="width: 15%">Longueur</th>
+                            <th style="width: 15%">P.U</th>
+                            <th style="width: 15%">Total HT</th>
+                            <th style="width: 5%"></th>
+                        </tr>
+                    </thead>
+                    <tbody id="hourdisTable"></tbody>
+                </table>
+            </div>
+
+            <!-- Panneau Section -->
+            <div class="section-title d-flex justify-content-between align-items-center">
+                <h4>PANNEAU TREILLIS SOUDES</h4>
+                <button type="button" class="btn btn-primary" id="addPanneau">
+                    Ajouter Panneau
+                </button>
+            </div>
+            <div class="table-responsive">
+                <table class="table table-bordered table-fixed">
+                    <thead class="table-primary">
+                        <tr>
+                            <th style="width: 30%">Description</th>
+                            <th style="width: 10%">Unité</th>
+                            <th style="width: 10%">Quantité</th>
+                            <th style="width: 15%">Longueur</th>
+                            <th style="width: 15%">P.U</th>
+                            <th style="width: 15%">Total HT</th>
+                            <th style="width: 5%"></th>
+                        </tr>
+                    </thead>
+                    <tbody id="panneauTable"></tbody>
+                </table>
+            </div>
+
+            <!-- Totals -->
+            <div class="row mt-4">
+                <div class="col-md-6">
+                    <!-- Empty for spacing -->
+                </div>
+                <div class="col-md-6">
+                    <div class="card">
+                        <div class="card-body">
+                            <div class="mb-3">
+                                <label for="totalHT" class="form-label">Total HT</label>
+                                <input type="number" class="form-control" id="totalHT" readonly>
+                            </div>
+                            <div class="mb-3">
+                                <label for="tax" class="form-label">TVA 20%</label>
+                                <input type="number" class="form-control" id="tax" readonly>
+                            </div>
+                            <div class="mb-3">
+                                <label for="totalTTC" class="form-label">Total TTC</label>
+                                <input type="number" class="form-control" id="totalTTC" readonly>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="d-grid gap-2 col-md-6 mx-auto mt-4">
+                <button type="submit" class="btn btn-success btn-lg">Générer le Devis</button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Poutrelles Modal -->
+    <div class="modal fade" id="poutrellesModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Sélectionner Poutrelle</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="table-responsive">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Description</th>
+                                    <th>Unité</th>
+                                    <th>Quantité</th>
+                                    <th>Longueur</th>
+                                    <th>P.U</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Hourdis Modal -->
+    <div class="modal fade" id="hourdisModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Sélectionner Hourdis</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="table-responsive">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Description</th>
+                                    <th>Unité</th>
+                                    <th>Quantité</th>
+                                    <th>Longueur</th>
+                                    <th>P.U</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Panneau Modal -->
+    <div class="modal fade" id="panneauModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Sélectionner Panneau</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="table-responsive">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Description</th>
+                                    <th>Unité</th>
+                                    <th>Quantité</th>
+                                    <th>Longueur</th>
+                                    <th>P.U</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            const poutrellesTable = document.getElementById("poutrellesTable");
+            const hourdisTable = document.getElementById("hourdisTable");
+            const panneauTable = document.getElementById("panneauTable");
+            const invoiceForm = document.getElementById("invoiceForm");
+
+            // Default items data
+            const defaultItems = {
+                poutrelles: [
+                    { description: "PCP 114N", unit: "ML", quantity: 21, length: 3.00, unit_price: 26.00 },
+                    { description: "PCP 113N", unit: "ML", quantity: 12, length: 4.00, unit_price: 26.00 }
+                ],
+                hourdis: [
+                    { description: "HOURDIS TYPE 12", unit: "U", quantity: 1, length: 300, unit_price: 3.50 }
+                ],
+                panneaux: [
+                    { description: "TRS SISMIQUE 5*3,5", unit: "U", quantity: 1, length: 9, unit_price: 195.00 }
+                ]
+            };
+
+            // Function to add a new item row
+            function addItemRow(item, tableBody) {
+                const row = document.createElement("tr");
+                const total = (item.quantity * item.length * item.unit_price).toFixed(2);
+                
+                row.innerHTML = `
+                    <td><input type="text" class="form-control" name="description" value="${item.description}" required></td>
+                    <td><input type="text" class="form-control" name="unit" value="${item.unit}" required></td>
+                    <td><input type="number" class="form-control" name="quantity" value="${item.quantity}" required></td>
+                    <td><input type="number" class="form-control" name="length" value="${item.length}" step="0.01" required></td>
+                    <td><input type="number" class="form-control" name="unitPrice" value="${item.unit_price}" step="0.01" required></td>
+                    <td><input type="number" class="form-control" name="totalHT" value="${total}" readonly></td>
+                    <td><button type="button" class="btn btn-danger btn-sm remove-item">×</button></td>
+                `;
+
+                row.querySelector(".remove-item").addEventListener("click", () => {
+                    row.remove();
+                    updateTotals();
+                });
+
+                // Add input event listeners to update total
+                ['quantity', 'length', 'unitPrice'].forEach(field => {
+                    row.querySelector(`input[name='${field}']`).addEventListener('input', () => {
+                        const qty = parseFloat(row.querySelector('input[name="quantity"]').value) || 0;
+                        const length = parseFloat(row.querySelector('input[name="length"]').value) || 0;
+                        const price = parseFloat(row.querySelector('input[name="unitPrice"]').value) || 0;
+                        const rowTotal = (qty * length * price).toFixed(2);
+                        row.querySelector('input[name="totalHT"]').value = rowTotal;
+                        updateTotals();
+                    });
+                });
+
+                tableBody.appendChild(row);
+                updateTotals();
+            }
+
+            // Function to update totals
+            function updateTotals() {
+                const totalHT = Array.from(document.querySelectorAll('input[name="totalHT"]'))
+                    .reduce((sum, input) => sum + (parseFloat(input.value) || 0), 0);
+                
+                const formattedTotalHT = totalHT.toFixed(2);
+                const tax = (totalHT * 0.20).toFixed(2);
+                const totalTTC = (totalHT * 1.20).toFixed(2);
+                
+                document.querySelector("#totalHT").value = formattedTotalHT;
+                document.querySelector("#tax").value = tax;
+                document.querySelector("#totalTTC").value = totalTTC;
+            }
+
+            // Initialize tables with default items
+            defaultItems.poutrelles.forEach(item => addItemRow(item, poutrellesTable));
+            defaultItems.hourdis.forEach(item => addItemRow(item, hourdisTable));
+            defaultItems.panneaux.forEach(item => addItemRow(item, panneauTable));
+
+            // Update initial totals
+            updateTotals();
+
+            // Predefined items data
+            const predefinedItems = {
+                poutrelles: [
+                    { description: "PCP 114N", unit: "ML", quantity: 21, length: 3.00, unit_price: 26.00 },
+                    { description: "PCP 113N", unit: "ML", quantity: 12, length: 4.00, unit_price: 26.00 },
+                    { description: "PCP 113B SISMIQUE", unit: "ML", quantity: 22, length: 4.20, unit_price: 26.00 },
+                    { description: "PCP 114B SISMIQUE", unit: "ML", quantity: 12, length: 4.90, unit_price: 30.00 },
+                    { description: "PCP 135 SISMIQUE", unit: "ML", quantity: 8, length: 5.00, unit_price: 38.00 },
+                    { description: "PCP 156 SISMIQUE", unit: "ML", quantity: 12, length: 5.10, unit_price: 38.00 },
+                    { description: "PCP 158 SISMIQUE", unit: "ML", quantity: 12, length: 5.50, unit_price: 51.00 }
+                ],
+                hourdis: [
+                    { description: "HOURDIS TYPE 08", unit: "U", quantity: 1, length: 200, unit_price: 3.40 },
+                    { description: "HOURDIS TYPE 12", unit: "U", quantity: 1, length: 300, unit_price: 3.50 },
+                    { description: "HOURDIS TYPE 16", unit: "U", quantity: 1, length: 0, unit_price: 0 },
+                    { description: "HOURDIS TYPE 20", unit: "U", quantity: 1, length: 0, unit_price: 0 },
+                    { description: "HOURDIS TYPE 25", unit: "U", quantity: 1, length: 450, unit_price: 4.80 },
+                    { description: "HOURDIS TYPE 30", unit: "U", quantity: 1, length: 0, unit_price: 0 }
+                ],
+                panneaux: [
+                    { description: "TRS Normal 3,5*3,5", unit: "U", quantity: 1, length: 0, unit_price: 0 },
+                    { description: "TRS SISMIQUE 5*3,5", unit: "U", quantity: 1, length: 9, unit_price: 195.00 }
+                ]
+            };
+
+            // Function to populate modal with items
+            function populateModal(modalId, items, targetTable) {
+                const modal = document.querySelector(modalId);
+                const tbody = modal.querySelector('tbody');
+                tbody.innerHTML = '';
+
+                items.forEach(item => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${item.description}</td>
+                        <td>${item.unit}</td>
+                        <td><input type="number" class="form-control form-control-sm" value="${item.quantity}" name="modal-quantity"></td>
+                        <td><input type="number" class="form-control form-control-sm" value="${item.length}" step="0.01" name="modal-length"></td>
+                        <td><input type="number" class="form-control form-control-sm" value="${item.unit_price}" step="0.01" name="modal-price"></td>
+                        <td>
+                            <button class="btn btn-primary btn-sm add-item">
+                                Ajouter
+                            </button>
+                        </td>
+                    `;
+
+                    row.querySelector('.add-item').addEventListener('click', () => {
+                        const newItem = {
+                            ...item,
+                            quantity: parseFloat(row.querySelector('[name="modal-quantity"]').value) || 0,
+                            length: parseFloat(row.querySelector('[name="modal-length"]').value) || 0,
+                            unit_price: parseFloat(row.querySelector('[name="modal-price"]').value) || 0
+                        };
+                        addItemRow(newItem, targetTable);
+                        bootstrap.Modal.getInstance(modal).hide();
+                    });
+
+                    tbody.appendChild(row);
+                });
+            }
+
+            // Update button click handlers
+            document.querySelector("#addPoutrelles").addEventListener("click", () => {
+                populateModal('#poutrellesModal', predefinedItems.poutrelles, poutrellesTable);
+                new bootstrap.Modal('#poutrellesModal').show();
+            });
+
+            document.querySelector("#addHourdis").addEventListener("click", () => {
+                populateModal('#hourdisModal', predefinedItems.hourdis, hourdisTable);
+                new bootstrap.Modal('#hourdisModal').show();
+            });
+
+            document.querySelector("#addPanneau").addEventListener("click", () => {
+                populateModal('#panneauModal', predefinedItems.panneaux, panneauTable);
+                new bootstrap.Modal('#panneauModal').show();
+            });
+
+            // Form submission
+            invoiceForm.addEventListener("submit", async (event) => {
+                event.preventDefault();
+
+                const getAllItems = () => {
+                    const items = [];
+                    [poutrellesTable, hourdisTable, panneauTable].forEach(table => {
+                        items.push(...Array.from(table.querySelectorAll("tr")).map(row => ({
+                            description: row.querySelector("input[name='description']").value,
+                            unit: row.querySelector("input[name='unit']").value,
+                            quantity: parseInt(row.querySelector("input[name='quantity']").value, 10),
+                            length: parseFloat(row.querySelector("input[name='length']").value),
+                            unit_price: parseFloat(row.querySelector("input[name='unitPrice']").value)
+                        })));
+                    });
+                    return items;
+                };
+
+                const data = {
+                    invoice_number: document.querySelector("#invoiceNumber").value,
+                    date: new Date().toISOString(),
+                    project: document.querySelector("#project").value,
+                    client_name: document.querySelector("#clientName").value,
+                    client_phone: document.querySelector("#clientPhone").value,
+                    total_ht: parseFloat(document.querySelector("#totalHT").value || 0),
+                    tax: parseFloat(document.querySelector("#tax").value || 0),
+                    total_ttc: parseFloat(document.querySelector("#totalTTC").value || 0),
+                    items: getAllItems(),
+                    frame_number: ""
+                };
+
+                console.log("Sending invoice data:", data);
+
+                try {
+                    // First create the invoice
+                    const createResponse = await fetch("/api/invoices/", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify(data)
+                    });
+
+                    if (!createResponse.ok) {
+                        const errorData = await createResponse.json();
+                        console.error("Server error:", errorData);
+                        throw new Error(`Failed to create invoice: ${JSON.stringify(errorData)}`);
+                    }
+
+                    const invoice = await createResponse.json();
+                    console.log("Created invoice:", invoice);
+
+                    // Then generate the PDF
+                    const pdfResponse = await fetch(`/api/invoices/${invoice.id}/generate-pdf`, {
+                        method: "POST",
+                        headers: { 
+                            "Content-Type": "application/json"
+                        },
+                        body: JSON.stringify(data)  // Send the same data for PDF generation
+                    });
+
+                    if (!pdfResponse.ok) {
+                        const errorData = await pdfResponse.text();
+                        console.error("PDF generation error:", errorData);
+                        throw new Error(`Failed to generate PDF: ${errorData}`);
+                    }
+
+                    // Handle PDF download
+                    const blob = await pdfResponse.blob();
+                    const url = window.URL.createObjectURL(blob);
+                    const a = document.createElement("a");
+                    a.href = url;
+                    a.download = `devis_${invoice.invoice_number}.pdf`;
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                    window.URL.revokeObjectURL(url);
+
+                } catch (error) {
+                    console.error("Error:", error);
+                    alert(`Error: ${error.message}`);
+                }
+            });
+        });
+    </script>
+</body>
+</html>

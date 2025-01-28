@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Devis PDF</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 20px; }
+    h1 { text-align: center; }
+    .header-container {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 10px;
+    }
+    .company-info {
+      text-align: right;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+    }
+    th, td {
+      border: 1px solid #000;
+      padding: 8px;
+      text-align: center;
+    }
+    th {
+      background-color: #f2f2f2;
+    }
+    .totals-table {
+      width: 300px;
+      float: right;
+      margin-top: 20px;
+      border: 1px solid #000;
+    }
+    .totals-table th, .totals-table td {
+      border: 1px solid #000;
+      padding: 8px;
+      text-align: right;
+    }
+    .totals-table th {
+      background-color: #eee;
+      text-align: left;
+    }
+  </style>
+</head>
+<body>
+  <!-- Company / Logo Header -->
+  <div class="header-container">
+    <div>
+      <img src="{{ logo_url }}" alt="Logo" style="height:60px;">
+    </div>
+    <div class="company-info">
+      <p>{{ company_name }}</p>
+      <p>{{ company_address }}</p>
+      <p>{{ company_phone }}</p>
+    </div>
+  </div>
+
+  <h1>DEVIS</h1>
+
+  <p><strong>Date:</strong> {{ date }}</p>
+  <p><strong>Client:</strong> {{ client_name }}</p>
+  <p><strong>Project:</strong> {{ project_name }}</p>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Description</th>
+        <th>Unit</th>
+        <th>Quantity</th>
+        <th>Price HT</th>
+        <th>Total HT</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for item in items %}
+      <tr>
+        <td>{{ item.description }}</td>
+        <td>{{ item.unit }}</td>
+        <td>{{ item.quantity }}</td>
+        <td>{{ "%.2f"|format(item.price_ht) }}</td>
+        <td>{{ "%.2f"|format(item.line_total_ht) }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+  <table class="totals-table">
+    <tr>
+      <th>Total HT</th>
+      <td>{{ "%.2f"|format(total_ht) }}</td>
+    </tr>
+    <tr>
+      <th>TVA ({{ tva_rate }}%)</th>
+      <td>{{ "%.2f"|format(tva_amount) }}</td>
+    </tr>
+    <tr>
+      <th>Total TTC</th>
+      <td>{{ "%.2f"|format(total_ttc) }}</td>
+    </tr>
+  </table>
+
+</body>
+</html>
