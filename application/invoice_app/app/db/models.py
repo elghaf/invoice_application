@@ -1,20 +1,28 @@
 from sqlalchemy.orm import DeclarativeBase, relationship
 from sqlalchemy import Column, Integer, String, Float, DateTime, ForeignKey
+from sqlalchemy.ext.declarative import declarative_base
 from datetime import datetime
 
-class Base(DeclarativeBase):
-    pass
+Base = declarative_base()
 
 class Invoice(Base):
     __tablename__ = "invoices"
 
     id = Column(Integer, primary_key=True, index=True)
-    customer_name = Column(String, index=True)
+    invoice_number = Column(String)
+    date = Column(DateTime)
+    project = Column(String)
+    client_name = Column(String)
+    client_phone = Column(String)
+    total_ht = Column(Float)
+    tax = Column(Float)
+    total_ttc = Column(Float)
+    frame_number = Column(String, nullable=True)
+    customer_name = Column(String)
     amount = Column(Float)
-    created_at = Column(DateTime, default=datetime.utcnow)
     status = Column(String, default="pending")
-    
-    # Add relationship to InvoiceItem
+    created_at = Column(DateTime, default=datetime.utcnow)
+
     items = relationship("InvoiceItem", back_populates="invoice")
 
 class InvoiceItem(Base):
@@ -23,11 +31,10 @@ class InvoiceItem(Base):
     id = Column(Integer, primary_key=True, index=True)
     invoice_id = Column(Integer, ForeignKey("invoices.id"))
     description = Column(String)
+    unit = Column(String)
     quantity = Column(Integer)
+    length = Column(Float)
     unit_price = Column(Float)
     total_price = Column(Float)
-    
-    # Add relationship to Invoice
-    invoice = relationship("Invoice", back_populates="items")
 
-__all__ = ["Base", "Invoice", "InvoiceItem"]
+    invoice = relationship("Invoice", back_populates="items") 

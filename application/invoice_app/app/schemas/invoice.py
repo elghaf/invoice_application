@@ -1,35 +1,48 @@
-from pydantic import BaseModel, validator, Field, ConfigDict
-from typing import List, Optional, Dict, Any
+from pydantic import BaseModel, computed_field
+from typing import List, Optional
 from datetime import datetime
 
-class InvoiceItemBase(BaseModel):
+class InvoiceItemCreate(BaseModel):
     description: str
+    unit: str
     quantity: int
+    length: float
     unit_price: float
-    total_price: float
+    
+    @computed_field
+    def total_price(self) -> float:
+        return self.quantity * self.length * self.unit_price
 
-class InvoiceItemCreate(InvoiceItemBase):
-    pass
+class InvoiceCreate(BaseModel):
+    invoice_number: str
+    date: datetime
+    project: str
+    client_name: str
+    client_phone: str
+    total_ht: float
+    tax: float
+    total_ttc: float
+    frame_number: Optional[str] = None
+    items: List[InvoiceItemCreate]
+    
+    @computed_field
+    def customer_name(self) -> str:
+        return self.client_name
+    
+    @computed_field
+    def amount(self) -> float:
+        return self.total_ttc
 
-class InvoiceItemResponse(InvoiceItemBase):
+class InvoiceItemResponse(InvoiceItemCreate):
     id: int
     invoice_id: int
 
     class Config:
         from_attributes = True
 
-class InvoiceBase(BaseModel):
-    customer_name: str
-    amount: float
-    status: str = "pending"
-
-class InvoiceCreate(InvoiceBase):
-    items: List[InvoiceItemCreate]
-
-class InvoiceResponse(InvoiceBase):
+class InvoiceResponse(InvoiceCreate):
     id: int
-    created_at: datetime
-    items: List[InvoiceItemResponse] = []
+    items: List[InvoiceItemResponse]
 
     class Config:
-        from_attributes = True
+        from_attributes = True 

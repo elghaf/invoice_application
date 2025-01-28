@@ -433,7 +433,8 @@
                             unit: row.querySelector("input[name='unit']").value,
                             quantity: parseInt(row.querySelector("input[name='quantity']").value, 10),
                             length: parseFloat(row.querySelector("input[name='length']").value),
-                            unit_price: parseFloat(row.querySelector("input[name='unitPrice']").value)
+                            unit_price: parseFloat(row.querySelector("input[name='unitPrice']").value),
+                            total_price: parseFloat(row.querySelector("input[name='totalHT']").value)
                         })));
                     });
                     return items;
@@ -441,7 +442,7 @@
 
                 const data = {
                     invoice_number: document.querySelector("#invoiceNumber").value,
-                    date: new Date().toISOString(),
+                    date: new Date(document.querySelector("#date").value).toISOString(),
                     project: document.querySelector("#project").value,
                     client_name: document.querySelector("#clientName").value,
                     client_phone: document.querySelector("#clientPhone").value,
@@ -449,7 +450,9 @@
                     tax: parseFloat(document.querySelector("#tax").value || 0),
                     total_ttc: parseFloat(document.querySelector("#totalTTC").value || 0),
                     items: getAllItems(),
-                    frame_number: ""
+                    frame_number: "",
+                    status: "pending",
+                    created_at: new Date().toISOString()
                 };
 
                 console.log("Sending invoice data:", data);
@@ -477,7 +480,7 @@
                         headers: { 
                             "Content-Type": "application/json"
                         },
-                        body: JSON.stringify(data)  // Send the same data for PDF generation
+                        body: JSON.stringify(invoice)  // Send the created invoice data for PDF generation
                     });
 
                     if (!pdfResponse.ok) {

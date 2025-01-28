@@ -1,27 +1,29 @@
 from fastapi import FastAPI, Request
-from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
-from fastapi.middleware.cors import CORSMiddleware
 from fastapi.templating import Jinja2Templates
-from app.api.endpoints import invoices
-from app.core.config import settings
+from app.routes.invoices import router as invoice_router
 from app.db.database import init_db
+import os
 
-app = FastAPI(title=settings.PROJECT_NAME)
+# Get the absolute path to the app directory
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
-# Mount static files with correct path
-app.mount("/static", StaticFiles(directory="app/static"), name="static")
+app = FastAPI(title="Invoice Generator")
 
-# Templates with correct path
-templates = Jinja2Templates(directory="app/templates")
+# Mount static files with absolute path
+app.mount("/static", StaticFiles(directory=os.path.join(BASE_DIR, "app/static")), name="static")
+
+# Templates with absolute path
+templates = Jinja2Templates(directory=os.path.join(BASE_DIR, "app/templates"))
 
 # Include routers
-app.include_router(invoices.router, prefix="/api/invoices", tags=["invoices"])
+app.include_router(invoice_router, prefix="/api/invoices", tags=["invoices"])
 
 @app.on_event("startup")
 async def startup_event():
     await init_db()
 
-@app.get("/", response_class=HTMLResponse)
-async def read_root(request: Request):
+# Root endpoint to serve the HTML page
+@app.get("/")
+async def root(request: Request):
     return templates.TemplateResponse("index.html", {"request": request})
