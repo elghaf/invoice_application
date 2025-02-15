@@ -8,7 +8,9 @@ import os
 # Get the absolute path to the app directory
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
+
 app = FastAPI(title="Invoice Generator")
+
 
 # Mount static files with absolute path
 app.mount("/static", StaticFiles(directory=os.path.join(BASE_DIR, "app/static")), name="static")
